@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#05060d" />
+  <meta name="description" content="Ubah namamu menjadi kartu karakter koleksi bertema neon. Kelas, stat, skill absurd, dan kelangkaan dihitung secara deterministik dari namamu." />
+  <title>Generator Kartu Karakter · Neon Card Lab</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23070a16'/%3E%3Cpath d='M32 7l5.8 19.2L57 32l-19.2 5.8L32 57l-5.8-19.2L7 32l19.2-5.8z' fill='%2367e8f9'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Latar dekoratif: aurora, grid, dan bintang -->
+  <div class="scene-bg" aria-hidden="true">
+    <div class="aurora aurora-1"></div>
+    <div class="aurora aurora-2"></div>
+    <div class="aurora aurora-3"></div>
+    <div class="grid-floor"></div>
+    <div class="stars"></div>
+  </div>
+
+  <div class="app">
+    <header class="hero">
+      <div class="eyebrow">
+        <span class="pulse-dot"></span>
+        Neon Card Lab <span class="eyebrow-sep">/</span> Seri 01
+      </div>
+      <h1>Generator <span class="text-gradient">Kartu Karakter</span></h1>
+      <p class="hero-sub">
+        Ketik namamu. Semesta akan memilih kelas, skill absurd, dan takdir kartumu
+        — <strong>selalu sama</strong> setiap kali kamu kembali.
+      </p>
+      <div class="hero-badges">
+        <span class="badge"><i></i>100% offline</span>
+        <span class="badge"><i></i>Deterministik</span>
+        <span class="badge"><i></i>Siap diunduh PNG</span>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <!-- Panel input -->
+      <aside class="panel" aria-labelledby="formTitle">
+        <div class="panel-head">
+          <div class="panel-title">
+            <span class="panel-icon" aria-hidden="true">✦</span>
+            <div>
+              <h2 id="formTitle">Buat karaktermu</h2>
+              <p>Nama adalah kunci takdir.</p>
+            </div>
+          </div>
+          <span class="step-chip" aria-hidden="true">01</span>
+        </div>
+
+        <form id="generateForm" novalidate>
+          <div class="field-label-row">
+            <label for="nameInput">Nama karakter</label>
+            <span id="charCount" class="char-count">0/26</span>
+          </div>
+          <div class="input-shell" id="inputShell">
+            <span class="input-spark" aria-hidden="true">✦</span>
+            <input
+              id="nameInput"
+              name="name"
+              type="text"
+              maxlength="26"
+              autocomplete="off"
+              autocapitalize="words"
+              spellcheck="false"
+              placeholder="Contoh: Raka Bintang"
+              aria-describedby="nameHint formError"
+            />
+            <button type="button" class="input-clear" id="clearBtn" aria-label="Hapus nama" hidden>×</button>
+          </div>
+          <p class="field-hint" id="nameHint">1–26 karakter · emoji &amp; simbol boleh</p>
+          <p class="form-error" id="formError" role="alert"></p>
+
+          <button type="submit" class="btn btn-primary" id="generateBtn">
+            <span class="btn-content">
+              <svg class="btn-sparkle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 3l1.8 5.4L19.5 10l-5.7 1.6L12 17l-1.8-5.4L4.5 10l5.7-1.6L12 3z"/>
+                <path d="M19 15l.7 2.1L22 18l-2.3.9L19 21l-.7-2.1L16 18l2.3-.9L19 15z"/>
+              </svg>
+              <span id="generateLabel">Generate Kartu</span>
+              <kbd aria-hidden="true">↵</kbd>
+            </span>
+          </button>
+          <button type="button" class="btn btn-secondary" id="randomBtn">
+            <span aria-hidden="true">🎲</span> Nama acak
+          </button>
+        </form>
+
+        <div class="panel-divider"><span>Coba nama ini</span></div>
+        <div class="suggestions" id="suggestions">
+          <button type="button" class="suggestion-btn" data-name="Budi Santuy">Budi Santuy</button>
+          <button type="button" class="suggestion-btn" data-name="Ratu Rebahan">Ratu Rebahan</button>
+          <button type="button" class="suggestion-btn" data-name="Sultan Overthinking">Sultan Overthinking</button>
+          <button type="button" class="suggestion-btn" data-name="Mbak Baper">Mbak Baper</button>
+        </div>
+
+        <div class="rarity-legend">
+          <div class="legend-head">
+            <h3>Tingkat kelangkaan</h3>
+            <span>peluang</span>
+          </div>
+          <ul class="legend-grid">
+            <li><span class="legend-gem common"></span><span>Common</span><b>45%</b></li>
+            <li><span class="legend-gem rare"></span><span>Rare</span><b>30%</b></li>
+            <li><span class="legend-gem epic"></span><span>Epic</span><b>18%</b></li>
+            <li><span class="legend-gem legendary"></span><span>Legendary</span><b>7%</b></li>
+          </ul>
+        </div>
+
+        <p class="seed-note">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 2l8 4v6c0 5-3.4 8.5-8 10-4.6-1.5-8-5-8-10V6l8-4z"/>
+            <path d="M9 12l2 2 4-4"/>
+          </svg>
+          <span>Kartu dihitung dari hash namamu, bukan acak setiap klik. Nama yang sama = kartu yang sama.</span>
+        </p>
+      </aside>
+
+      <!-- Panggung kartu -->
+      <section class="stage" id="stage" data-rarity="common" aria-labelledby="stageTitle">
+        <h2 class="sr-only" id="stageTitle">Pratinjau kartu karakter</h2>
+        <div class="stage-halo" aria-hidden="true"></div>
+        <div class="stage-ring" aria-hidden="true"></div>
+
+        <div class="stage-top" aria-hidden="true">
+          <span class="stage-label"><span class="live-dot"></span> Live preview</span>
+          <span id="stageRarity">Kartu tertutup</span>
+        </div>
+
+        <div class="card-zone" id="cardZone">
+          <div class="card-float">
+            <div class="card-tilt" id="cardTilt">
+              <div class="card-inner" id="cardInner">
+
+                <!-- Sisi belakang kartu -->
+                <div class="card-face card-back" id="cardBack">
+                  <div class="back-grid"></div>
+                  <div class="back-frame"></div>
+                  <div class="back-top">
+                    <span class="back-brand"><span>✦</span> Neon Card Lab</span>
+                    <span class="back-code">Series 01</span>
+                  </div>
+                  <div class="back-center">
+                    <div class="back-sigil">
+                      <span class="back-ring back-ring-a"></span>
+                      <span class="back-ring back-ring-b"></span>
+                      <span class="back-diamond"></span>
+                      <span class="back-question">?</span>
+                      <span class="back-star s1">✦</span>
+                      <span class="back-star s2">✦</span>
+                      <span class="back-star s3">✦</span>
+                    </div>
+                    <p class="back-title">Kartu Karakter</p>
+                    <p class="back-sub">Type · Generate · Reveal</p>
+                  </div>
+                  <div class="back-bottom">
+                    <span class="back-barcode" aria-hidden="true"></span>
+                    <span>Masukkan nama untuk membuka takdirmu</span>
+                  </div>
+                </div>
+
+                <!-- Sisi depan kartu -->
+                <article class="card-face card-front" id="cardFront" data-rarity="common" aria-label="Kartu karakter" aria-hidden="true">
+                  <div class="card-grid" aria-hidden="true"></div>
+                  <div class="card-glow" aria-hidden="true"></div>
+                  <div class="holo" aria-hidden="true"></div>
+                  <div class="sparkles" aria-hidden="true">
+                    <span>✦</span><span>✦</span><span>✦</span><span>✦</span><span>✦</span><span>✦</span>
+                  </div>
+
+                  <div class="card-content">
+                    <header class="card-top">
+                      <span class="rarity-badge" id="rarityBadge">
+                        <span class="rarity-diamond" aria-hidden="true"></span>
+                        <span id="rarityLabel">Common</span>
+                      </span>
+                      <span class="card-number" id="cardNumber">#0000</span>
+                    </header>
+
+                    <div class="portrait" id="portrait">
+                      <div class="portrait-aura" aria-hidden="true"></div>
+                      <div class="portrait-grid" aria-hidden="true"></div>
+                      <span class="orbit orbit-a" aria-hidden="true"></span>
+                      <span class="orbit orbit-b" aria-hidden="true"></span>
+                      <span class="portrait-emoji" id="portraitEmoji" role="img" aria-label="Ilustrasi kelas">✦</span>
+                      <div class="power-chip">
+                        <span>PWR</span>
+                        <strong id="powerValue">--</strong>
+                      </div>
+                      <span class="corner-mark tl" aria-hidden="true"></span>
+                      <span class="corner-mark tr" aria-hidden="true"></span>
+                      <span class="corner-mark bl" aria-hidden="true"></span>
+                      <span class="corner-mark br" aria-hidden="true"></span>
+                    </div>
+
+                    <div class="identity">
+                      <h2 class="character-name" id="characterName">Nama Karakter</h2>
+                      <p class="character-meta">
+                        <span class="class-icon" id="classIcon" aria-hidden="true">✦</span>
+                        <span id="className">Kelas</span>
+                        <span class="meta-dot">·</span>
+                        <span id="tierLabel">Tier C</span>
+                      </p>
+                    </div>
+
+                    <div class="stats" id="stats" aria-label="Statistik karakter"></div>
+
+                    <div class="skill-box" id="skillBox">
+                      <div class="skill-head">
+                        <span class="skill-eyebrow">✦ Skill Spesial</span>
+                        <span class="skill-tag" id="skillTag">Signature</span>
+                      </div>
+                      <h3 class="skill-name" id="skillName">Menunggu takdir…</h3>
+                      <p class="skill-desc" id="skillDesc">Skill akan muncul setelah kartu dibuka.</p>
+                    </div>
+
+                    <footer class="card-footer">
+                      <span>Neon Card Lab</span>
+                      <span id="seedLabel">Seed · 000000</span>
+                    </footer>
+                  </div>
+                </article>
+
+              </div>
+            </div>
+          </div>
+          <div class="particles" id="particles" aria-hidden="true"></div>
+        </div>
+
+        <div class="stage-footer">
+          <button type="button" class="btn btn-download" id="downloadBtn" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/>
+            </svg>
+            <span id="downloadLabel">Unduh Kartu</span>
+            <span class="dl-format" aria-hidden="true">PNG</span>
+          </button>
+          <p class="status" id="status" role="status" aria-live="polite">Kartu menunggu namamu.</p>
+        </div>
+
+        <p class="tilt-hint" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="7" y="2" width="10" height="20" rx="5"/><path d="M12 6v4"/>
+          </svg>
+          Gerakkan kursor atau geser di atas kartu untuk efek 3D
+        </p>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>© <span id="year">2026</span> Neon Card Lab</span>
+      <span class="footer-dot">•</span>
+      <span>HTML, CSS &amp; JavaScript murni</span>
+      <span class="footer-dot">•</span>
+      <span>Nama sama, takdir sama.</span>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
